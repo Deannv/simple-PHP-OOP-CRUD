@@ -18,6 +18,7 @@
     </script>
     <?php
     require_once 'app/User.php';
+
     ?>
 
 </head>
@@ -150,7 +151,13 @@
                             <td><?= $user['kota'] ?></td>
                             <td><?= $user['alamat'] ?></td>
                             <td><?= $user['nama_status'] ?></td>
-                            <td><a href="">Lihat</a></td>
+                            <td class="d-flex align-items-center gap-2 justify-content-center">
+                                <a href="?id=<?= $user['id'] ?>" class="btn btn-primary">Lihat</a>
+                                <form action="index.php" method="POST" onsubmit="return confirm('Yakin untuk menghapus data <?= $user['nama'] ?>')">
+                                    <input value="<?= $user['id'] ?>" hidden name="deleleId">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </td>
                         </tr>
 
                     <?php
