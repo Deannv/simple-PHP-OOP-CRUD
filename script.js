@@ -90,12 +90,20 @@ function checkEmail(e) {
 }
 
 function validateSubmit() {
-    if (!checkEmail(form.email)) form.email.value = '';
-    if (!checkPassword()) form.password.value = '';
+    console.log("ha")
+    if (!checkEmail(form.email)) {
+        form.email.value = '';
+        return false;
+    }
+    if (!checkPassword()) {
+        form.password.value = '';
+        return false;
+    }
     if (!checkRetypePass(form.retypePassword)) {
         form.password.value = '';
         form.retypePassword.value = '';
+        return false;
     }
 
-    return false;
+    return true;
 }
