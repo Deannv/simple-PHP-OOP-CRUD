@@ -19,8 +19,13 @@
     <?php
     require_once 'app/User.php';
     require_once 'app/Status.php';
-    if (isset($_POST['deleteButton'])) $user->delete($_POST['deleteId']);
-    if (isset($_POST['saveButton'])) $user->store($_POST);
+    if (isset($_GET['id'])) {
+        $edit_user = $user->show($_GET['id'])[0];
+    } else {
+        header('Location: index.php');
+        exit();
+    }
+    if (isset($_POST['updateButton'])) $user->update($_POST);
     ?>
 
 </head>
@@ -28,7 +33,8 @@
 <body>
     <main>
         <div class="card m-auto my-5" style="width: 90%;">
-            <form action="index.php" method="POST" name="theForm" onsubmit="return validateSubmit()" enctype="multipart/form-data">
+            <form action="edit.php?id=<?= $edit_user['id'] ?>" method="POST" name="theForm" onsubmit="return validateSubmit()" enctype="multipart/form-data">
+                <input type="text" name="id" value="<?= $edit_user['id'] ?>" hidden>
                 <div class="card-header">
                     Data User
                 </div>
@@ -37,7 +43,7 @@
                         <div style="width: 70%;">
                             <div class="mb-3">
                                 <label for="nama" class="form-label">Nama</label>
-                                <input type="text" class="form-control" name="nama" id="nama" aria-describedby="emailHelp" oninput="checkName(this)">
+                                <input type="text" class="form-control" name="nama" value="<?= $edit_user['nama'] ?>" id="nama" aria-describedby="emailHelp" oninput="checkName(this)">
                                 <div id="namaError" class="form-text">
                                     ‎
                                 </div>
@@ -45,14 +51,14 @@
                             <div class="d-flex align-items-center gap-2" style="width: 100%;">
                                 <div class="mb-3" style="width: 50%;">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" class="form-control" name="password" id="password" aria-describedby="emailHelp" oninput="checkPassword()">
+                                    <input type="password" class="form-control" value="<?= $edit_user['password'] ?>" disabled name="password" id="password" aria-describedby="emailHelp" oninput="checkPassword()">
                                     <div id="passwordError" class="form-text">
                                         ‎
                                     </div>
                                 </div>
                                 <div class="mb-3" style="width: 50%;">
                                     <label for="retypePassword" class="form-label">Retype Password</label>
-                                    <input type="password" class="form-control" id="retypePassword" aria-describedby="emailHelp" name="retypePassword" oninput="checkRetypePass(this)">
+                                    <input type="password" class="form-control" value="<?= $edit_user['password'] ?>" disabled id="retypePassword" aria-describedby="emailHelp" name="retypePassword" oninput="checkRetypePass(this)">
                                     <div id="retypePasswordError" class="form-text">
                                         ‎
                                     </div>
@@ -60,14 +66,14 @@
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" aria-describedby="emailHelp" oninput="checkEmail(this)">
+                                <input type="email" class="form-control" name="email" value="<?= $edit_user['email'] ?>" id="email" aria-describedby="emailHelp" oninput="checkEmail(this)">
                                 <div id="emailError" class="form-text">
                                     ‎
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="alamat" class="form-label">Alamat</label>
-                                <input type="text" class="form-control" name="alamat" id="alamat" placeholder="Alamat" aria-describedby="emailHelp">
+                                <input type="text" class="form-control" name="alamat" value="<?= $edit_user['alamat'] ?>" id="alamat" placeholder="Alamat" aria-describedby="emailHelp">
                                 <div id="alamatError" class="form-text">
                                     ‎
                                 </div>
@@ -75,7 +81,7 @@
                             <div class="d-flex align-items-center gap-2">
                                 <div class="mb-3" style="width: 33%;">
                                     <label for="kota" class="form-label">Kota</label>
-                                    <input type="text" class="form-control" name="kota" id="kota" aria-describedby="emailHelp">
+                                    <input type="text" class="form-control" name="kota" value="<?= $edit_user['kota'] ?>" id="kota" aria-describedby="emailHelp">
                                     <div id="kotaError" class="form-text">
                                         ‎
                                     </div>
@@ -87,7 +93,7 @@
                                         <?php
                                         $all_status = $status->all();
                                         while ($stat = mysqli_fetch_assoc($all_status)) : ?>
-                                            <option value="<?= $stat['id'] ?>"><?= $stat['nama'] ?></option>
+                                            <option value="<?= $stat['id'] ?>" <?= ($edit_user['status'] == $stat['id'] ? 'selected' : '') ?>><?= $stat['nama'] ?></option>
                                         <?php endwhile; ?>
                                     </select>
                                     <div id="statusError" class="form-text">
@@ -96,7 +102,7 @@
                                 </div>
                                 <div class="mb-3" style="width: 33%;">
                                     <label for="telp" class="form-label">Telp.</label>
-                                    <input type="text" class="form-control" id="telp" aria-describedby="emailHelp" name="telp">
+                                    <input type="text" class="form-control" id="telp" value="<?= $edit_user['telp'] ?>" aria-describedby="emailHelp" name="telp">
                                     <div id="telpError" class="form-text">
                                         ‎
                                     </div>
@@ -115,66 +121,9 @@
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-center">
-                    <button class="btn btn-primary" type="submit" style="width: 30%;" name="saveButton">Save</button>
+                    <button class="btn btn-primary" type="submit" style="width: 30%;" name="updateButton">Update</button>
                 </div>
             </form>
-        </div>
-        <div class="w-75 m-auto mt-3">
-            <table id="tabel-data" class="table table-striped table-bordered" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>NO.</th>
-                        <th>ID</th>
-                        <th>NAMA</th>
-                        <th>EMAIL</th>
-                        <th>KOTA</th>
-                        <th>ALAMAT</th>
-                        <th>STATUS</th>
-                        <th>ACTION</th>
-                    </tr>
-                </thead>
-                <tfoot>
-                    <tr>
-                        <th>NO.</th>
-                        <th>ID</th>
-                        <th>NAMA</th>
-                        <th>EMAIL</th>
-                        <th>KOTA</th>
-                        <th>ALAMAT</th>
-                        <th>STATUS</th>
-                        <th>ACTION</th>
-                    </tr>
-                </tfoot>
-                <tbody>
-                    <?php
-                    $all_data   = $user->all();
-                    $index      = 0;
-                    foreach ($all_data as $user) :
-                        $index++;
-                    ?>
-                        <tr>
-                            <td><?= $index ?></td>
-                            <td><?= $user['id'] ?></td>
-                            <td><?= $user['nama'] ?></td>
-                            <td><?= $user['email'] ?></td>
-                            <td><?= $user['kota'] ?></td>
-                            <td><?= $user['alamat'] ?></td>
-                            <td><?= $user['nama_status'] ?></td>
-                            <td class="d-flex align-items-center gap-2 justify-content-center">
-                                <a href="edit.php?id=<?= $user['id'] ?>" class="btn btn-primary">Edit</a>
-                                <form action="index.php" method="POST" onsubmit="return confirm('Yakin untuk menghapus data <?= $user['nama'] ?>')">
-                                    <input value="<?= $user['id'] ?>" hidden name="deleteId">
-                                    <button type="submit" class="btn btn-danger" name="deleteButton">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-
-                    <?php
-                    endforeach;
-                    ?>
-
-                </tbody>
-            </table>
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
